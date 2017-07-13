@@ -635,7 +635,6 @@ public abstract class JCVideoPlayer extends FrameLayout implements View.OnClickL
                         int duration = getDuration();
                         int progress = position * 100 / (duration == 0 ? 1 : duration);
                         
-                        System.out.println("progress => " + progress);
                         setProgressAndText(progress, position, duration);
                     }
                 });

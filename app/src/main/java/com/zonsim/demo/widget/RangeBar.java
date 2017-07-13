@@ -128,7 +128,6 @@ public class RangeBar extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         
-        System.out.println("--------------------------");
         
         L.i(TAG, "w => " + w);
         L.i(TAG, "h => " + h);
@@ -155,14 +154,6 @@ public class RangeBar extends View {
             setLeftIndex(mLeftIndex);
             setRightIndex(mRightIndex);
         }
-        
-        /*if (mProgress != 0) {
-            System.out.println("setIndex=>" + mProgress);
-            setLeftIndex(mProgress - 5);
-            setRightIndex(mProgress);
-        }*/
-
-//        mRightThumb.setX((mRightIndex / (float) (mTickCount - 1)) * (w - 200) + 100);
         
         L.i(TAG, "onSizeChanged()完毕");
     }
