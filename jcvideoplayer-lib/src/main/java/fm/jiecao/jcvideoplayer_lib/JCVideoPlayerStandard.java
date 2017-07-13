@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.annotation.AttrRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -48,7 +51,11 @@ public class JCVideoPlayerStandard extends JCVideoPlayer {
     public JCVideoPlayerStandard(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
-
+    
+    public JCVideoPlayerStandard(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+    
     @Override
     public void init(Context context) {
         super.init(context);
@@ -329,6 +336,7 @@ public class JCVideoPlayerStandard extends JCVideoPlayer {
     @Override
     public void setProgressAndText(int progress, int position, int duration) {
         super.setProgressAndText(progress, position, duration);
+    
         if (progress != 0) bottomProgressBar.setProgress(progress);
     }
 

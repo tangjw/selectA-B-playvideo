@@ -55,7 +55,7 @@ public class PointBView extends View {
         
         mSrcRect = new Rect(0, 0, mBitWidth, mBitHeight);
         //+10padding
-        mTargetRadiusPx = Math.max(mBitHeight, mBitWidth)+10;
+        mTargetRadiusPx = Math.max(mBitHeight, mBitWidth);
     }
     
     /**
@@ -65,7 +65,6 @@ public class PointBView extends View {
      */
     public void init(int coY) {
         mY = coY;
-        mDestRect = new Rect(0, coY - mBitHeight, 0, coY);
     }
     
     @Override
@@ -80,18 +79,18 @@ public class PointBView extends View {
     
     private boolean mIsPressed = false;
     
-    private float mX;
-    private float mY;
+    private int mX;
+    private int mY;
     
     @Override
     public void setX(float x) {
-        mX = x + mBitWidth;
-        mDestRect = new Rect((int)x, (int)mY-mBitHeight, (int)mX, (int)mY);
+        mX = (int) (x + 0.5f);
+        mDestRect = new Rect(mX, mY - mBitHeight, mX + mBitWidth, mY);
     }
     
     @Override
     public float getX() {
-        return mX - mBitWidth;
+        return mX;
     }
     
     @Override
@@ -110,13 +109,12 @@ public class PointBView extends View {
     
     public boolean isInTargetZone(float x, float y) {
         
-        if ((mX-x) > 0 && (mY - y) > 0) {
-            System.out.println((mX-x) < mTargetRadiusPx && (mY -y ) < mTargetRadiusPx);
-            return (mX-x) < mTargetRadiusPx && (mY -y ) < mTargetRadiusPx;
+        if ((mX+mBitWidth - x) > 0 && (mY - y) > 0) {
+            return (mX+mBitWidth - x) < mTargetRadiusPx && (mY - y) < mTargetRadiusPx;
         } else {
             return false;
         }
-    
+        
     }
     
     public void release() {

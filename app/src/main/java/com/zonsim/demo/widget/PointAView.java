@@ -25,7 +25,7 @@ public class PointAView extends View {
     private Rect mSrcRect, mDestRect;
     private int mBitWidth;
     private int mBitHeight;
-
+    
     
     public PointAView(Context context) {
         this(context, null);
@@ -53,11 +53,11 @@ public class PointAView extends View {
         
         mSrcRect = new Rect(0, 0, mBitWidth, mBitHeight);
         //+10padding
-        mTargetRadiusPx = Math.max(mBitHeight, mBitWidth)+10;
+        mTargetRadiusPx = Math.max(mBitHeight, mBitWidth) + 10;
     }
     
     
-    public void init( int coY) {
+    public void init(int coY) {
         mY = coY;
         mDestRect = new Rect(0, coY, 0, coY);
     }
@@ -74,18 +74,18 @@ public class PointAView extends View {
     
     private boolean mIsPressed = false;
     
-    private float mX;
-    private float mY;
+    private int mX;
+    private int mY;
     
     @Override
     public void setX(float x) {
-        mX = x-mBitWidth;
-        mDestRect = new Rect((int)mX, (int)mY-mBitHeight, (int)x, (int)mY);
+        mX = (int) (x + 0.5f);
+        mDestRect = new Rect(mX - mBitWidth, mY - mBitHeight, mX, mY);
     }
     
     @Override
     public float getX() {
-        return mX+mBitWidth;
+        return mX;
     }
     
     @Override
@@ -103,12 +103,12 @@ public class PointAView extends View {
     private float mTargetRadiusPx;
     
     public boolean isInTargetZone(float x, float y) {
-    
-        if ((x - mX) > 0 && (mY -y) > 0) {
-            return (x - mX) < mTargetRadiusPx && (mY -y ) < mTargetRadiusPx;
+        
+        if ((x - (mX - mBitWidth)) > 0 && (mY - y) > 0) {
+            return (x - (mX - mBitWidth)) < mTargetRadiusPx && (mY - y) < mTargetRadiusPx;
         } else {
             return false;
-        } 
+        }
     }
     
     

@@ -1,15 +1,16 @@
 package com.zonsim.demo.widget;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
+import android.support.annotation.AttrRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.view.ViewTreeObserver;
 
 import com.zonsim.demo.R;
 
 import fm.jiecao.jcvideoplayer_lib.JCMediaManager;
-import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
 import fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard;
 
 /**
@@ -23,14 +24,16 @@ public class MyJcVideoView extends JCVideoPlayerStandard {
     private View mView;
     private View mTvAB;
     private RangeBar mRangeBar;
-    private ProgressBar mProgressBar;
-    private int mProgress;
-    private int mPosition;
-    private int mDuration;
+    private int mProgress = -1;
+    private int mPosition = -1;
+    private int mDuration = -1;
     private boolean mABVisibility;
     private int mLeftPosition;
     private int mRightPosition;
-    private int mPer;
+    private float mPer;
+    private int mLeftPinIndex;
+    private int mRightPinIndex;
+    private boolean isShowAB;
     
     public void setListener(Listener listener) {
         mListener = listener;
@@ -44,9 +47,12 @@ public class MyJcVideoView extends JCVideoPlayerStandard {
         super(context, attrs);
     }
     
+    public MyJcVideoView(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+    
     @Override
     public void onAutoCompletion() {
-        
         
         if (currentScreen == SCREEN_WINDOW_FULLSCREEN) {
             onStateAutoComplete();
@@ -58,32 +64,39 @@ public class MyJcVideoView extends JCVideoPlayerStandard {
     
     @Override
     public void init(Context context) {
-       
         super.init(context);
-    
-        JCVideoPlayer.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        JCVideoPlayer.NORMAL_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
         
         mView = findViewById(R.id.back);
         mTvAB = findViewById(R.id.tv_ab);
         mRangeBar = (RangeBar) findViewById(R.id.bottom_seek_progress1);
-        mABVisibility = mRangeBar.getVisibility() == VISIBLE;
         mTvAB.setOnClickListener(new OnClickListener() {
+            
             @Override
             public void onClick(View v) {
-             
-                mRangeBar.setVisibility(mABVisibility ? GONE : VISIBLE);
-                mABVisibility = mRangeBar.getVisibility() == VISIBLE;
-                progressBar.setVisibility(mABVisibility ? GONE : VISIBLE);
-    
-                mRangeBar.setLeftIndex(mProgress);
-                mRangeBar.setRightIndex(mProgress+5);
-    
-                mPer = mDuration / 100;
-                mLeftPosition = mPosition;
-                mRightPosition = mPosition + 5 * mPer;
-    
-    
+                
+                isShowAB = !isShowAB;
+                
+                mRangeBar.setVisibility(isShowAB ? VISIBLE : GONE);
+                
+                progressBar.setVisibility(isShowAB ? GONE : VISIBLE);
+                
+                mPer = (float) JCMediaManager.instance().mediaPlayer.getDuration() / 100;
+                
+                mRangeBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mRangeBar.setThumbX(mProgress);
+                        mLeftPinIndex = mProgress;
+                        mRightPinIndex = mLeftPinIndex + 5;
+                        mLeftPosition = (int) (mLeftPinIndex * mPer + 0.5f);
+                        mRightPosition = mLeftPosition + (int) (5 * mPer + 0.5f);
+                        mRangeBar.setLeftIndex(mLeftPinIndex);
+                        mRangeBar.setRightIndex(mRightPinIndex);
+                        
+                        mRangeBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                });
+                
             }
         });
         
@@ -91,26 +104,23 @@ public class MyJcVideoView extends JCVideoPlayerStandard {
         mRangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
             @Override
             public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex, int rightPinIndex) {
-    
-                System.out.println("leftPinIndex"+leftPinIndex);
-                System.out.println("rightPinIndex"+rightPinIndex);
                 
-                //校准一下
-                int left = leftPinIndex* mPer;
-                if (left < mPosition) {
-                    mLeftPosition = left;
-                } else {
-                    JCMediaManager.instance().mediaPlayer.seekTo(mLeftPosition);
-                    mRangeBar.setThumbX(leftPinIndex);
+                if (mLeftPinIndex != leftPinIndex) {
+                    mLeftPinIndex = leftPinIndex;
+                    mLeftPosition = (int) (mLeftPinIndex * mPer + 0.5);
+                    if (mLeftPosition > mPosition) {
+                        mRangeBar.setThumbX(leftPinIndex);
+                        JCMediaManager.instance().mediaPlayer.seekTo(mLeftPosition);
+                    }
                 }
-    
-                int right = rightPinIndex * mPer;
-                if (right > mPosition) {
-                    mRightPosition = right;
-                } else {
-                    JCMediaManager.instance().mediaPlayer.seekTo(mLeftPosition);
-                    mRangeBar.setThumbX(leftPinIndex);
-                } 
+                if (mRightPinIndex != rightPinIndex) {
+                    mRightPinIndex = rightPinIndex;
+                    mRightPosition = mLeftPosition + (int) ((rightPinIndex - leftPinIndex) * mPer + 0.5);
+                    if (mRightPosition < mPosition) {
+                        mRangeBar.setThumbX(leftPinIndex);
+                        JCMediaManager.instance().mediaPlayer.seekTo(mLeftPosition);
+                    }
+                }
             }
         });
     }
@@ -119,23 +129,16 @@ public class MyJcVideoView extends JCVideoPlayerStandard {
     @Override
     public void setProgressAndText(int progress, int position, int duration) {
         super.setProgressAndText(progress, position, duration);
-        mProgress = progress;
-        mPosition = position;
-        mDuration = duration;
-    
-    
-        if (mABVisibility) {
+        
+        if (isShowAB && mProgress != progress) {
             mRangeBar.setThumbX(progress);
-            System.out.println("position"+position);
-            System.out.println("position"+mRightPosition);
-            if (position > mRightPosition) {
+            
+            if (position >= mRightPosition) {
                 JCMediaManager.instance().mediaPlayer.seekTo(mLeftPosition);
-//                setUp();
-                System.out.println("----------");
-            }  
+            }
         }
-    
-    
+        mPosition = position;
+        mProgress = progress;
     }
     
     @Override

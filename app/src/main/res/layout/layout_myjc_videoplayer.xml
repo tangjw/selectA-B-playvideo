@@ -45,16 +45,13 @@
 
         <FrameLayout
             android:layout_width="0dp"
-           
             android:layout_height="match_parent"
             android:layout_weight="1.0">
 
             <SeekBar
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
                 android:id="@+id/bottom_seek_progress"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_gravity="center_vertical"
                 android:background="@null"
                 android:max="100"
@@ -64,12 +61,12 @@
                 android:thumb="@drawable/jc_bottom_seek_thumb"/>
 
             <com.zonsim.demo.widget.RangeBar
-                android:visibility="gone"
-                android:layout_gravity="center_vertical"
                 android:id="@+id/bottom_seek_progress1"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                />
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"/>
+            
         </FrameLayout>
 
 
